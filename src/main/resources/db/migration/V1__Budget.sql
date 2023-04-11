@@ -6,3 +6,7 @@ create table budget
     amount int  not null,
     type   text not null
 );
+
+update budget
+set type = 'Расход'
+where type = 'Комиссия';
