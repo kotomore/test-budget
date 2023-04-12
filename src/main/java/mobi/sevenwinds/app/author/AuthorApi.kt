@@ -15,5 +15,11 @@ fun NormalOpenAPIRoute.author() {
 }
 
 data class AuthorSaveRecord(
-    val fullName: String
+    val id: Int?,
+    val fullName: String,
+)
+
+data class AuthorRecord(
+    val fullName: String,
+    val createdAt: String
 )

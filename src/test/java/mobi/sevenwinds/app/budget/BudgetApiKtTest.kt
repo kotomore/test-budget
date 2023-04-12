@@ -1,12 +1,19 @@
 package mobi.sevenwinds.app.budget
 
 import io.restassured.RestAssured
+import io.restassured.path.json.JsonPath
+import mobi.sevenwinds.app.author.AuthorRecord
+import mobi.sevenwinds.app.author.AuthorSaveRecord
+import mobi.sevenwinds.app.author.AuthorTable
 import mobi.sevenwinds.common.ServerTest
 import mobi.sevenwinds.common.jsonBody
 import mobi.sevenwinds.common.toResponse
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.Assert
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -14,7 +21,10 @@ class BudgetApiKtTest : ServerTest() {
 
     @BeforeEach
     internal fun setUp() {
-        transaction { BudgetTable.deleteAll() }
+        transaction {
+            BudgetTable.deleteAll()
+            AuthorTable.deleteAll()
+        }
     }
 
     @Test
@@ -73,6 +83,34 @@ class BudgetApiKtTest : ServerTest() {
             .jsonBody(BudgetRecord(2020, 15, 5, BudgetType.Приход))
             .post("/budget/add")
             .then().statusCode(400)
+    }
+
+    @Test
+    fun testInvalidAuthorId() {
+        RestAssured.given()
+            .jsonBody(BudgetRecordWithAuthorId(2020, -5, 5, BudgetType.Приход, 1))
+            .post("/budget/add")
+            .then().statusCode(400)
+    }
+
+    @Test
+    fun testValidAuthorId() {
+        val authorResponse = RestAssured.given()
+            .jsonBody(AuthorSaveRecord(null, "John Doe"))
+            .post("/author/add")
+            .then().statusCode(200)
+            .extract().`as`(AuthorSaveRecord::class.java)
+
+        val budgetRequest = BudgetRecordWithAuthorId(2020, 5, 5, BudgetType.Приход, authorResponse.id!!)
+        RestAssured.given()
+            .jsonBody(budgetRequest)
+            .post("/budget/add")
+            .then().statusCode(200)
+
+        val result = RestAssured.given()
+            .get("/budget/year/2020/stats?limit=100&offset=0")
+            .body().jsonPath().getList<String>("items.author.fullName")
+        Assert.assertEquals("John Doe", result.get(0))
     }
 
     private fun addRecord(record: BudgetRecord) {

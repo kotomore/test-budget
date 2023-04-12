@@ -13,7 +13,7 @@ import com.papsign.ktor.openapigen.route.route
 
 fun NormalOpenAPIRoute.budget() {
     route("/budget") {
-        route("/add").post<Unit, BudgetRecord, BudgetRecord>(info("Добавить запись")) { param, body ->
+        route("/add").post<Unit, BudgetRecord, BudgetRecordRequest>(info("Добавить запись")) { param, body ->
             respond(BudgetService.addRecord(body))
         }
 
@@ -25,11 +25,32 @@ fun NormalOpenAPIRoute.budget() {
     }
 }
 
-data class BudgetRecord(
+open class BudgetRecord(
     @Min(1900) val year: Int,
     @Min(1) @Max(12) val month: Int,
     @Min(1) val amount: Int,
     val type: BudgetType
+    ) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BudgetRecord
+
+        if (year != other.year) return false
+        if (month != other.month) return false
+        if (amount != other.amount) return false
+        if (type != other.type) return false
+        return true
+    }
+}
+
+data class BudgetRecordRequest(
+    @Min(1900) val year: Int,
+    @Min(1) @Max(12) val month: Int,
+    @Min(1) val amount: Int,
+    val type: BudgetType,
+    val authorId: Int? = null
 )
 
 data class BudgetYearParam(

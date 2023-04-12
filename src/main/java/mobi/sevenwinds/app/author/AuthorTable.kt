@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.IntIdTable
 
 object AuthorTable : IntIdTable("author") {
     val fullName = text("full_name")
-    val createdAt = datetime("createdAt")
+    val createdAt = datetime("created_at")
 }
 
 class AuthorEntity(id: EntityID<Int>) : IntEntity(id) {
@@ -17,6 +17,6 @@ class AuthorEntity(id: EntityID<Int>) : IntEntity(id) {
     var createdAt by AuthorTable.createdAt
 
     fun toResponse(): AuthorSaveRecord {
-        return AuthorSaveRecord(fullName)
+        return AuthorSaveRecord(id.value, fullName)
     }
 }
