@@ -17,7 +17,6 @@ class AuthorApiKtTest : ServerTest() {
         transaction { AuthorTable.deleteAll() }
     }
 
-
     @Test
     fun testValidAuthorsAdd() {
         RestAssured.given()

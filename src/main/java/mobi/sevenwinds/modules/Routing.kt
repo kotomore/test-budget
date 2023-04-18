@@ -3,7 +3,6 @@ package mobi.sevenwinds.modules
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.tag
-import com.papsign.ktor.openapigen.route.tags
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*
